@@ -44,14 +44,43 @@ echo "➡ Copying specstory_wrapper.py → ~/.specstory_wrapper/"
 mkdir -p "$HOME/.specstory_wrapper"
 cp specstory_wrapper.py "$HOME/.specstory_wrapper/specstory_wrapper.py"
 
-# --- 5. Add ~/bin to PATH if missing  ---
-PROFILE=""
-if [[ -n "$ZSH_VERSION" ]]; then PROFILE="$HOME/.zshrc"; fi
-if [[ -n "$BASH_VERSION" ]]; then PROFILE="$HOME/.bashrc"; fi
-
 if ! echo "$PATH" | grep -q "$HOME/bin"; then
-  echo "➡ Adding ~/bin to PATH in $PROFILE"
-  echo 'export PATH="$HOME/bin:$PATH"' >> "$PROFILE"
+  echo "➡ Adding ~/bin to PATH in your shell config (bash/zsh)"
+
+  PROFILE_FILES=()
+
+  # Always consider both common rc files so it works even if you switch shells
+  PROFILE_FILES+=("$HOME/.zshrc" "$HOME/.bashrc")
+
+  # De-duplicate list
+  UNIQUE_PROFILES=()
+  for P in "${PROFILE_FILES[@]}"; do
+    SKIP=false
+    for U in "${UNIQUE_PROFILES[@]}"; do
+      if [[ "$P" == "$U" ]]; then
+        SKIP=true
+        break
+      fi
+    done
+    $SKIP && continue
+    UNIQUE_PROFILES+=("$P")
+  done
+
+  for PROFILE in "${UNIQUE_PROFILES[@]}"; do
+    [[ -z "$PROFILE" ]] && continue
+
+    # Create the profile file if it doesn't exist yet
+    if [[ ! -f "$PROFILE" ]]; then
+      touch "$PROFILE"
+    fi
+
+    if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$PROFILE" 2>/dev/null; then
+      echo "➡ Updating $PROFILE"
+      echo 'export PATH="$HOME/bin:$PATH"' >> "$PROFILE"
+    else
+      echo "✔ ~/bin already configured in $PROFILE"
+    fi
+  done
 fi
 
 # --- 6. Conda per-environment activation hook (FIXED) ---
@@ -61,7 +90,8 @@ if command -v conda >/dev/null 2>&1; then
   echo "IMPORTANT:"
   echo "Enter the name of the conda environment where Specstory capture should be active."
   echo "(Example: base or your dev environment name)"
-  read -p "Environment name: " ENV_NAME
+  printf "Environment name: "
+  read ENV_NAME
 
   # Validate environment exists
   ENV_PATH="$(conda env list | grep -E "^${ENV_NAME} " | awk '{print $2}')"
@@ -76,9 +106,15 @@ if command -v conda >/dev/null 2>&1; then
 
   echo "➡ Adding activation hook ONLY for env '$ENV_NAME' → $HOOK_DIR/specstory.sh"
 
-  cat > "$HOOK_DIR/specstory.sh" <<EOF
-export PATH="\$HOME/bin:\$PATH"
-alias claude="specstory run claude --no-cloud-sync"
+  cat > "$HOOK_DIR/specstory.sh" <<'EOF'
+export PATH="$HOME/bin:$PATH"
+# If a Claude CLI is installed, route 'claude' through SpecStory.
+# Otherwise, guide the user rather than hanging.
+if command -v claude >/dev/null 2>&1; then
+  alias claude="specstory run claude --no-cloud-sync"
+else
+  alias claude='echo "claude CLI not found. Install a Claude CLI, or launch the app via: specstory run open -a \"Claude\" --no-cloud-sync"'
+fi
 EOF
 
   echo "✔ Hook installed for environment: $ENV_NAME"

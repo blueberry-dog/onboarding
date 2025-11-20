@@ -45,6 +45,8 @@ To set up Claude Code, follow the instructions provided [here](https://docs.goog
 
 For this study, we’ll be using a custom screen recorder to capture your coding sessions. The tool helps you choose exactly which windows you’re comfortable sharing and records only high-signal activity related to your interactions.
 
+Please create a conda environment to set up the recording tool. This should be the same conda environment you use for setting up SpecStory.
+
 ### Installation
 
 Please install and run the recorder from the following repository:
@@ -73,7 +75,7 @@ Install both components following the SpecStory installation guide ([Google Doc]
 
 ### Verification
 
-Verify that SpecStory is logging correctly by running a short AI interaction and then checking the .specstory/history/ folder for a newly created Markdown file. Open the file to confirm that it contains the recent requests and responses from your interaction.
+Verify that SpecStory is logging correctly by running a short AI interaction and then checking the .specstory/history/ folder for a newly created Markdown file. Open the file to confirm that it contains the recent requests and responses from your interaction along with event timestamps.
 
 > Reminder to update your [status](https://forms.gle/SLXdJk3SbjHCYnpd9) once you have completed this step.
 
