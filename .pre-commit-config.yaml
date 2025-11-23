@@ -9,7 +9,7 @@ repos:
         entry: python3 .config/ai-hooks/ai_guard.py pre-commit
         language: system
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
       - id: ai-commit-msg
         name: Block AI indicators in commit messages
         entry: python3 .config/ai-hooks/ai_guard.py commit-msg
