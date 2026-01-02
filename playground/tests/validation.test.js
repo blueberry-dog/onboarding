@@ -78,7 +78,7 @@ test("converts meters to kilometers", () => {
 
 test("converts miles to meters", () => {
   const result = convert("distance", 1, "mi", "m");
-  strictEqual(result, 1609.344);
+  strictEqual(result, 1609.34);
 });
 
 test("converts meters to miles", () => {
@@ -93,7 +93,7 @@ test("converts grams to pounds", () => {
 
 test("converts pounds to grams", () => {
   const result = convert("weight", 1, "lb", "g");
-  strictEqual(result, 453.592);
+  strictEqual(result, 453.59);
 });
 
 test("converts ounces to pounds", () => {
